@@ -5,14 +5,17 @@ function App( ){
   const [inputMessage, setInputMessage] = useState("")
   const [ mensajeRecibido, setmensajeRecibido] = useState([])
   const [ socket, setSocket ] = useState() 
+  const [ user, setuser ] = useState("")
 
 useEffect (()=>{
-  const newSocket = io("localhost:3000")
+  const newSocket = io("localHost:3000")
   setSocket(newSocket) 
 
   newSocket.on("mensaje", (msg) => {
     setmensajeRecibido (msg) 
   })
+
+  setuser(prompt("Ingrese su nombre:"))
 
   return( ) => {newSocket.disconnect() }
 }, [])
@@ -20,7 +23,13 @@ useEffect (()=>{
   const handleSubmit = (e) => {
     e.preventDefault( )
     // como se envian los mensajes.....
-    socket.emit("mensaje", inputMessage)
+    const hora = new Date().toLocaleTimeString()
+
+    socket.emit("mensaje", {
+      user,
+      inputMessage,
+      hora
+    })
   }
 
   return (
@@ -29,8 +38,9 @@ useEffect (()=>{
         <input onChange={(e) => setInputMessage(e.target.value)}/> 
         <button type="submit">Enviar</button>
       </form>
-      { mensajeRecibido.map ( mensaje => <div> {mensaje}</div>) }
-      { mensajeRecibido } 
+
+      
+      { mensajeRecibido.map ( mensaje => <div> {mensaje.user} ({mensaje.hora}): {mensaje.inputMessage}</div>) }
     </div>
   ) 
 }
